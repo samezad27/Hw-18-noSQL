@@ -1,8 +1,9 @@
 # 18 No SQL HW
 
-Website:
-
+Video: https://drive.google.com/file/d/1XONbXn4QXAprJt_IYsq7kXu2UvIJBTBm/view
 Git:
+
+https://github.com/samezad27/Hw-18-noSQL
 
 ## Requirements
 
