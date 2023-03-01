@@ -50,12 +50,57 @@ router.put("/:userId", (req, res) => {
 });
 
 //TODO - ROUTE THAT DELETES A SINGLE USER BASED ON USER ID
-router.delete("/:userId", (req, res) => {});
+router.delete("/:userId", (req, res) => {
+  User.findByIdAndDelete(req.params.userId, function (err) {
+    if (err) {
+      res.status(500).send("This user cannot be deleted");
+    } else {
+      res.status(200).send("Successfully deleted");
+    }
+  });
+});
 
 //TODO - ROUTE THAT ADDS A FRIEND TO A USER
-router.put("/:userId/friends/:friendId", (req, res) => {});
+router.post("/:userId/friends/:friendId", (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.params.userId },
+    { $addToSet: { friends: req.params.friendId } },
+    { new: true }
+  )
+    .then((user) =>
+      User.findOneAndUpdate(
+        { _id: req.params.friendId },
+        { $addToSet: { friends: req.params.userId } },
+        { new: true }
+      )
+    )
+    .then((user) =>
+      !user
+        ? res.status(404).json({ message: "No user found with that ID" })
+        : res.json("Your friend has been added")
+    )
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+});
 
 //TODO - ROUTE THAT DELETES A FRIEND FROM A USER'S FRIENDS, DONT DELETE THE FRIEND AS A USER THOUGH!
-router.delete("/:userId/friends/:friendId", (req, res) => {});
+router.delete("/:userId/friends/:friendId", (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.params.userId },
+    { $pull: { friends: req.params.friendId } }
+  )
+    .then((user) =>
+      !user
+        ? res.status(404).json({ message: "No user with this id" })
+        : User.findOneAndUpdate(
+            { _id: req.params.friendId },
+            { $pull: { friends: req.params.userId } }
+          )
+    )
+    .then((user) => res.json({ message: "The friend has been removed." }))
+    .catch((err) => res.status(500).json(err));
+});
 
 module.exports = router;
